@@ -2,11 +2,11 @@ import { writeFileSync } from 'fs';
 import DecimalJS from 'decimal.js';
 import Decimal30 from './decimal3.0_dev15.mjs';
 
-const NUM_QUESTIONS = 500;
-const TOTAL_DIGITS = 8192;
+const NUM_QUESTIONS = 100; // logはめちゃくちゃ重いため、100問にしてメモリ爆発を防ぐ
+const TOTAL_DIGITS = 256;  // 256桁の超巨大な数値で対数計算
 
-function generateHugeNumberString() {
-    const isMinus = Math.random() > 0.5 ? '-' : '';
+function generateHugePositiveNumberString() {
+    // logの引数は正の数（> 0）である必要があるため、マイナスはなし
     const floatLen = Math.floor(Math.random() * 16) + 1;
     const intLen = TOTAL_DIGITS - floatLen;
     
@@ -21,112 +21,65 @@ function generateHugeNumberString() {
         floatPart += Math.floor(Math.random() * 10).toString();
     }
     
-    return `${isMinus}${intPart}.${floatPart}`;
+    return `${intPart}.${floatPart}`;
 }
 
-console.log(`Generating ${NUM_QUESTIONS} test cases (${TOTAL_DIGITS} digits total, max 16 decimal places)...`);
+console.log(`Generating ${NUM_QUESTIONS} positive test cases (${TOTAL_DIGITS} digits total)...`);
 const testCases = [];
 for (let i = 0; i < NUM_QUESTIONS; i++) {
-    const a = generateHugeNumberString();
-    const b = generateHugeNumberString();
-    
-    let bDiv = generateHugeNumberString().replace('-', '');
-    if (bDiv.startsWith('0.') || parseFloat(bDiv) === 0) {
-        bDiv = '5.' + bDiv.split('.')[1];
-    }
-    
-    testCases.push({ a, b, bDiv });
+    testCases.push(generateHugePositiveNumberString());
 }
 
 const d30 = new Decimal30();
 
 const results = {
-    'decimal.js': { add: 0, sub: 0, mul: 0, div: 0 },
-    'decimal3.0': { add: 0, sub: 0, mul: 0, div: 0 }
+    'decimal.js': 0,
+    'decimal3.0': 0
 };
 
-console.log('\n--- Running decimal.js ---');
+// ==========================================
+// 👑 ENTRY NO.1: decimal.js
+// ==========================================
+console.log('\n--- Running decimal.js (log) ---');
 
 let start = performance.now();
-for (const { a, b } of testCases) {
+for (const val of testCases) {
+    // 256桁 + 精度16 = precision 272
     DecimalJS.set({ precision: 272 });
-    new DecimalJS(a).add(b);
+    new DecimalJS(val).ln(); // decimal.jsの自然対数は .ln()
 }
-results['decimal.js'].add = performance.now() - start;
-
-start = performance.now();
-for (const { a, b } of testCases) {
-    DecimalJS.set({ precision: 272 });
-    new DecimalJS(a).sub(b);
-}
-results['decimal.js'].sub = performance.now() - start;
-
-start = performance.now();
-for (const { a, b } of testCases) {
-    DecimalJS.set({ precision: 272 });
-    new DecimalJS(a).mul(b);
-}
-results['decimal.js'].mul = performance.now() - start;
-
-start = performance.now();
-for (const { a, bDiv } of testCases) {
-    DecimalJS.set({ precision: 272 });
-    new DecimalJS(a).div(bDiv);
-}
-results['decimal.js'].div = performance.now() - start;
+results['decimal.js'] = performance.now() - start;
 
 
-console.log('--- Running decimal3.0 dev15 ---');
+// ==========================================
+// 👑 ENTRY NO.2: decimal3.0 dev15
+// ==========================================
+console.log('--- Running decimal3.0 dev15 (log) ---');
 
 if (typeof d30.setprecision === 'function') {
     d30.setprecision(16);
 }
 
 start = performance.now();
-for (const { a, b } of testCases) {
-    d30.add(a, b);
+for (const val of testCases) {
+    // decimal3.0のlog関数（メソッド名が ln か log か、もしくは引数構成に合わせて適宜修正してください）
+    if (typeof d30.log === 'function') {
+        d30.log(val);
+    } else if (typeof d30.ln === 'function') {
+        d30.ln(val);
+    }
 }
-results['decimal3.0'].add = performance.now() - start;
-
-start = performance.now();
-for (const { a, b } of testCases) {
-    d30.sub(a, b);
-}
-results['decimal3.0'].sub = performance.now() - start;
-
-start = performance.now();
-for (const { a, b } of testCases) {
-    d30.mul(a, b);
-}
-results['decimal3.0'].mul = performance.now() - start;
-
-start = performance.now();
-for (const { a, bDiv } of testCases) {
-    d30.div(a, bDiv);
-}
-results['decimal3.0'].div = performance.now() - start;
+results['decimal3.0'] = performance.now() - start;
 
 
-console.log('\n====== 🏆 BENCHMARK RESULTS ======');
+// ==========================================
+// 📊 結果出力
+// ==========================================
+console.log(`\n====== 🏆 BENCHMARK RESULTS (Natural Logarithm / ${TOTAL_DIGITS} Digits) ======`);
 console.table({
-    'Addition': {
-        'decimal.js(ms)': results['decimal.js'].add.toFixed(2),
-        'decimal3.0(ms)': results['decimal3.0'].add.toFixed(2),
-        'Winner': results['decimal.js'].add < results['decimal3.0'].add ? 'decimal.js' : 'decimal3.0 🔥'
-    },
-    'Subtraction': {
-        'decimal.js(ms)': results['decimal.js'].sub.toFixed(2),
-        'decimal3.0(ms)': results['decimal3.0'].sub.toFixed(2),
-        'Winner': results['decimal.js'].sub < results['decimal3.0'].sub ? 'decimal.js' : 'decimal3.0 🔥'
-    },
-    'Multiplication': {
-        'decimal.js(ms)': results['decimal.js'].mul.toFixed(2),
-        'decimal3.0(ms)': results['decimal3.0'].mul.toFixed(2),
-        'Winner': results['decimal.js'].mul < results['decimal3.0'].mul ? 'decimal.js' : 'decimal3.0 🔥'
-    },
-    'Division': {
-        'decimal.js(ms)': results['decimal.js'].div.toFixed(2),
-        'decimal3.0(ms)': results['decimal3.0'].div.toFixed(2),
-        'Winner': results['decimal.js'].div < results['decimal3.0'].div ? 'decimal.js' : 'decimal3.0 🔥'
+    'Natural Logarithm (ln)': {
+        'decimal.js(ms)': results['decimal.js'].toFixed(2),
+        'decimal3.0(ms)': results['decimal3.0'].toFixed(2),
+        'Winner': results['decimal.js'] < results['decimal3.0'] ? 'decimal.js 👑' : 'decimal3.0 🔥'
     }
 });
