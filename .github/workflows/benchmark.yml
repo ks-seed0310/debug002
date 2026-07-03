@@ -1,0 +1,32 @@
+name: "First Decimals Showdown: decimal.js vs decimal3.0"
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch: # GitHubのブラウザ画面から手動でボタンポチで実行できるようにします
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20' # パフォーマンス測定が安定しているNode.js v20を使用
+
+    - name: Install decimal.js
+      run: npm install decimal.js
+
+    - name: Verify decimal3.0 code existence
+      run: |
+        if [ ! -f "./decimal3.0_dev15.mjs" ]; then
+          echo "❌ ERROR: ./decimal3.0_dev15.mjs がリポジトリに見つかりません！ファイルを配置してください。"
+          exit 1
+        fi
+
+    - name: Run 四則演算対決 ベンチマーク
+      run: node benchmark.mjs
