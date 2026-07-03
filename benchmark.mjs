@@ -2,11 +2,10 @@ import { writeFileSync } from 'fs';
 import DecimalJS from 'decimal.js';
 import Decimal30 from './decimal3.0_dev15.mjs';
 
-const NUM_QUESTIONS = 100; // logはめちゃくちゃ重いため、100問にしてメモリ爆発を防ぐ
-const TOTAL_DIGITS = 256;  // 256桁の超巨大な数値で対数計算
+const NUM_QUESTIONS = 200; // 問題数も2倍の200問にアップ
+const TOTAL_DIGITS = 512;  // 桁数も2倍の【512桁】へ引き上げ
 
 function generateHugePositiveNumberString() {
-    // logの引数は正の数（> 0）である必要があるため、マイナスはなし
     const floatLen = Math.floor(Math.random() * 16) + 1;
     const intLen = TOTAL_DIGITS - floatLen;
     
@@ -37,23 +36,17 @@ const results = {
     'decimal3.0': 0
 };
 
-// ==========================================
-// 👑 ENTRY NO.1: decimal.js
-// ==========================================
 console.log('\n--- Running decimal.js (log) ---');
 
 let start = performance.now();
 for (const val of testCases) {
-    // 256桁 + 精度16 = precision 272
-    DecimalJS.set({ precision: 272 });
-    new DecimalJS(val).ln(); // decimal.jsの自然対数は .ln()
+    // 512桁 + 精度16 = precision 528
+    DecimalJS.set({ precision: 528 });
+    new DecimalJS(val).ln();
 }
 results['decimal.js'] = performance.now() - start;
 
 
-// ==========================================
-// 👑 ENTRY NO.2: decimal3.0 dev15
-// ==========================================
 console.log('--- Running decimal3.0 dev15 (log) ---');
 
 if (typeof d30.setprecision === 'function') {
@@ -62,7 +55,6 @@ if (typeof d30.setprecision === 'function') {
 
 start = performance.now();
 for (const val of testCases) {
-    // decimal3.0のlog関数（メソッド名が ln か log か、もしくは引数構成に合わせて適宜修正してください）
     if (typeof d30.log === 'function') {
         d30.log(val);
     } else if (typeof d30.ln === 'function') {
@@ -72,9 +64,6 @@ for (const val of testCases) {
 results['decimal3.0'] = performance.now() - start;
 
 
-// ==========================================
-// 📊 結果出力
-// ==========================================
 console.log(`\n====== 🏆 BENCHMARK RESULTS (Natural Logarithm / ${TOTAL_DIGITS} Digits) ======`);
 console.table({
     'Natural Logarithm (ln)': {
