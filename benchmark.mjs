@@ -2,8 +2,8 @@ import { writeFileSync } from 'fs';
 import DecimalJS from 'decimal.js';
 import Decimal30 from './decimal3.0_dev15.mjs';
 
-const NUM_QUESTIONS = 100;
-const TOTAL_DIGITS = 16384;
+const NUM_QUESTIONS = 10000;
+const TOTAL_DIGITS = 8192;
 
 function generateHugeNumberString() {
     const isMinus = Math.random() > 0.5 ? '-' : '';
@@ -107,7 +107,7 @@ for (const { a, bDiv } of testCases) {
 results['decimal3.0'].div = performance.now() - start;
 
 
-console.log('\n====== 🏆 BENCHMARK RESULTS (256 Digits / 10,000 Questions) ======');
+console.log('\n====== 🏆 BENCHMARK RESULTS ======');
 console.table({
     'Addition': {
         'decimal.js(ms)': results['decimal.js'].add.toFixed(2),
