@@ -2,8 +2,8 @@ import { writeFileSync } from 'fs';
 import DecimalJS from 'decimal.js';
 import Decimal30 from './decimal3.0_dev15.mjs';
 
-const NUM_QUESTIONS = 10000;
-const TOTAL_DIGITS = 65536;
+const NUM_QUESTIONS = 100;
+const TOTAL_DIGITS = 16384;
 
 function generateHugeNumberString() {
     const isMinus = Math.random() > 0.5 ? '-' : '';
