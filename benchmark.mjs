@@ -3,7 +3,7 @@ import DecimalJS from 'decimal.js';
 import Decimal30 from './decimal3.0_dev15.mjs';
 
 const NUM_QUESTIONS = 10000;
-const TOTAL_DIGITS = 256;
+const TOTAL_DIGITS = 1024;
 
 function generateHugeNumberString() {
     const isMinus = Math.random() > 0.5 ? '-' : '';
