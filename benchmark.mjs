@@ -2,7 +2,7 @@ import { writeFileSync } from 'fs';
 import DecimalJS from 'decimal.js';
 import Decimal30 from './decimal3.0_dev15.mjs';
 
-const NUM_QUESTIONS = 10000;
+const NUM_QUESTIONS = 500;
 const TOTAL_DIGITS = 8192;
 
 function generateHugeNumberString() {
