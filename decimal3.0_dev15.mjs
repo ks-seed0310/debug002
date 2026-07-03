@@ -212,45 +212,45 @@ class decimal{
     //Length is Base10 Write!
     #config={
         add:{
-            FloatMaxLength:128
+            FloatMaxLength:16
         },
         sub:{
-            FloatMaxLength:128
+            FloatMaxLength:16
         },
         mul:{
-            FloatMaxLength:64,
+            FloatMaxLength:16,
             karatubaConfig:{
                 karatubaExecute:true,
                 karatubaExecuteMinBits:4096,
             }
         },
         div:{
-            FloatMaxLength:64,
+            FloatMaxLength:16,
             ZeroDivisionOutput:Infinity,
             ThrowZeroDivisionError:false,
         },
         mod:{
-            FloatMaxLength:64
+            FloatMaxLength:16
         },
         log:{
-            FloatMaxLength:32
+            FloatMaxLength:16
         },
         pow:{
             xInt_yInt:{
-                FloatMaxLength:0
+                FloatMaxLength:16
             },
             xFloat_yInt:{
-                FloatMaxLength:32
+                FloatMaxLength:16
             },
             xAny_yFloat:{
-                FloatMaxLength:32
+                FloatMaxLength:16
             }
         },
         exp:{
-            FloatMaxLength:32
+            FloatMaxLength:16
         },
         trig:{
-            FloatMaxLength:32
+            FloatMaxLength:16
         },
         global:{
             PlusCalcLength:16,
